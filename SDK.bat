@@ -2,13 +2,6 @@
 setlocal enabledelayedexpansion
 pushd %~dp0
 
-if "%~nx0"=="SDK-[NEW].bat" (
-    (
-        >nul move /y "%~nx0" "SDK.bat"
-        "SDK.bat"
-    )
-)
-
 set SDK_VERSION=1.0.0.0
 set "SDK_CONFIG=config.ini"
 
@@ -50,9 +43,14 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
              exit /b 1
          )
 
-         start "" "SDK-[NEW].bat" && exit 0
+         REM START THE NEW UPDATE
+            (
+                >nul move /y "SDK-[NEW].bat" "%~nx0"
+                "%~nx0" [THIS IS THE NEW VERSION]
+            )
+         REM /START THE NEW UPDATE
 
-         exit /b 1
+         exit /b 0
          )
      ) else (
          echo:
