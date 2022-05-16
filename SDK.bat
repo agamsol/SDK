@@ -12,7 +12,7 @@ if "%~nx0"=="SDK-[NEW].bat" (
     )
 )
 
-set SDK_VERSION=1.0.0.1
+set SDK_VERSION=1.0.0.0
 set "SDK_CONFIG=config.ini"
 
 :: <REPO SETTINGS>
