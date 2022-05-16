@@ -20,11 +20,11 @@ set "REPO_FULL=!REPO_BASE_URL!!REPO_USER!/raw/!REPO_BRANCH!"
 :: <REPO SETTINGS>
 
 :: <INTERNET CONNECTION CHECK>
-ping -n 1 github.com | findstr /c:"TTL">nul || (
-    echo:
-    echo ERROR=NO CONNECTION
-    exit /b 1
-)
+ ping -n 1 github.com | findstr /c:"TTL">nul || (
+     echo:
+     echo ERROR=NO CONNECTION
+     exit /b 1
+ )
 :: </INTERNET CONNECTION CHECK>
 
 if not exist "!SDK_CONFIG!" (
@@ -34,48 +34,60 @@ if not exist "!SDK_CONFIG!" (
 
 call :LOAD_CONFIG "!SDK_CONFIG!"
 
-
-
 :: <CHECK FOR SDK UPDATES>
-if not "!CHECKED_AT!"=="!DATE!" (
-    set "CHECKED_AT=!DATE!"
-    call :CREATE_CONFIG
-    for /f "delims=" %%a in ('curl -sLk "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK-Version.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
-    if defined SERVER_SDK_VERSION (
-        if not "!SDK_VERSION!"=="!SERVER_SDK_VERSION!" (
+ if not "!CHECKED_AT!"=="!DATE!" (
+     set "CHECKED_AT=!DATE!"
+     call :CREATE_CONFIG
+     for /f "delims=" %%a in ('curl -sLk "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK-Version.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
+     if defined SERVER_SDK_VERSION (
+         if not "!SDK_VERSION!"=="!SERVER_SDK_VERSION!" (
 
-        curl.exe -Lfs#ko "SDK-[NEW].bat" "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK.bat"
+         curl.exe -Ls#ko "SDK-[NEW].bat" "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK.bat"
 
-        if not exist "SDK-[NEW].bat" (
-            echo:
-            echo ERROR=Failed to update the SDK.
-            exit /b 1
-        )
+         if not exist "SDK-[NEW].bat" (
+             echo:
+             echo ERROR=Failed to update the SDK.
+             exit /b 1
+         )
 
-        title SDK-[NEW] - SDK UPDATE
-        start "" "SDK-[NEW].bat" && exit 0
+         title SDK-[NEW] - SDK UPDATE
+         start "" "SDK-[NEW].bat" && exit 0
 
-        exit /b 1
-        )
-    ) else (
-        echo:
-        echo ERROR=Failed to check for updates.
-    )
-)
+         exit /b 1
+         )
+     ) else (
+         echo:
+         echo ERROR=Failed to check for updates.
+     )
+ )
 :: </CHECK FOR SDK UPDATES>
 
 :: <UPDATE ALL LIBRARIES>
+REM GET LIBRARIES
+curl -Lks "!REPO_FULL!/Libraries/Libraries.ini"
+exit /b
 for /f "delims=" %%a in ('dir /b "Libraries\*"') do (
-    ECHO %%a
     REM CHECK IF META FILE EXISTS AND LOAD ITS INFORMATION
     if exist "Libraries\%%a\META.ini" (
         set VERSION=
         set SERVER_VERSION=
         call :LOAD_CONFIG "Libraries\%%a\META.ini"
-        echo curl -Lsk "!REPO_FULL!/Libraries/%%a/%%a.bat"
-        REM for /f "delims=" %%a in ('curl -Lsk "!REPO_BASE_URL!!REPO_USER!/raw/latest/libraries/%%a/%%a.bat"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a&echo SERVER_%%a
+        for /f "delims=" %%a in ('curl -Lsk "!REPO_FULL!/Libraries/%%a/META.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
 
-        if not "!VERSION!"=="!SERVER_VERSION!" echo server version
+        if not "!VERSION!"=="!SERVER_VERSION!" (
+            echo NEW UPDATE AVAILABLE FOR THE LIBRARY: %%a
+            REM INSTALL THE UPDATE OF THE LIBRARY
+            echo Updating Library: !REPO_FULL!/Libraries/%%a
+            del /s /q "Libraries\%%a\*">nul
+            curl --create-dirs -#Lkso "Libraries\%%a\%%a.bat" "!REPO_FULL!/Libraries/%%a/%%a.bat"
+            curl --create-dirs -#Lkso "Libraries\%%a\META.ini" "!REPO_FULL!/Libraries/%%a/META.ini"
+        )
+    ) else (
+        echo LIBRARY DOESNT EXIST IN THIS PC: %%a
+        REM INSTALL LIBRARY FOR THE FIRST TIME
+        echo Downloading Library: !REPO_FULL!/Libraries/%%a
+        curl --create-dirs -#Lkso "Libraries\%%a\%%a.bat" "!REPO_FULL!/Libraries/%%a/%%a.bat"
+        curl --create-dirs -#Lkso "Libraries\%%a\META.ini" "!REPO_FULL!/Libraries/%%a/META.ini"
     )
 )
 
