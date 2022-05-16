@@ -32,7 +32,10 @@ if not exist "!SDK_CONFIG!" (
     call :CREATE_CONFIG
 )
 
-call :LOAD_CONFIG
+call :LOAD_CONFIG "!SDK_CONFIG!"
+
+
+
 :: <CHECK FOR SDK UPDATES>
 if not "!CHECKED_AT!"=="!DATE!" (
     set "CHECKED_AT=!DATE!"
@@ -61,13 +64,29 @@ if not "!CHECKED_AT!"=="!DATE!" (
 )
 :: </CHECK FOR SDK UPDATES>
 
+:: <UPDATE ALL LIBRARIES>
+for /f "delims=" %%a in ('dir /b "Libraries\*"') do (
+    ECHO %%a
+    REM CHECK IF META FILE EXISTS AND LOAD ITS INFORMATION
+    if exist "Libraries\%%a\META.ini" (
+        set VERSION=
+        set SERVER_VERSION=
+        call :LOAD_CONFIG "Libraries\%%a\META.ini"
+        echo curl -Lsk "!REPO_FULL!/Libraries/%%a/%%a.bat"
+        REM for /f "delims=" %%a in ('curl -Lsk "!REPO_BASE_URL!!REPO_USER!/raw/latest/libraries/%%a/%%a.bat"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a&echo SERVER_%%a
+
+        if not "!VERSION!"=="!SERVER_VERSION!" echo server version
+    )
+)
+
+:: </UPDATE ALL LIBRARIES>
 echo ended process
 pause
 exit /b
 
 :: <LOAD CONFIG>
 :LOAD_CONFIG
-for /f "tokens=*" %%a in ('type "!SDK_CONFIG!"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set %%a
+for /f "tokens=*" %%a in ('type "%~1"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set %%a
 exit /b
 :: </LOAD CONFIG>
 
