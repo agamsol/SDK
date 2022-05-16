@@ -3,9 +3,6 @@ setlocal enabledelayedexpansion
 pushd %~dp0
 
 if "%~nx0"=="SDK-[NEW].bat" (
-    for /f "tokens=2 delims=," %%A in ('2^>nul tasklist /v /nh /fo csv /fi "imagename eq cmd.exe" ^| findstr /c:"SDK-[NEW] - SDK UPDATE"') do (
-        >nul 2>&1 taskkill /f /pid "%%~A" /t
-    )
     (
         >nul move /y "%~nx0" "SDK.bat"
         "SDK.bat"
@@ -53,7 +50,6 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
              exit /b 1
          )
 
-         title SDK-[NEW] - SDK UPDATE
          start "" "SDK-[NEW].bat" && exit 0
 
          exit /b 1
