@@ -12,7 +12,7 @@ if "%~nx0"=="SDK-[NEW].bat" (
     )
 )
 
-set SDK_VERSION=1.0.0.0
+set SDK_VERSION=1.0.0.1
 set "SDK_CONFIG=config.ini"
 
 :: <REPO SETTINGS>
@@ -86,6 +86,7 @@ for %%a in (!LIBRARIES!) do (
             set VERSION=
             set SERVER_VERSION=
             call :LOAD_CONFIG "Libraries\%%a\META.ini"
+
             for /f "delims=" %%a in ('curl -Lsk "!REPO_FULL!/Libraries/%%a/META.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
 
             if not "!VERSION!"=="!SERVER_VERSION!" (
