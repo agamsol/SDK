@@ -9,7 +9,7 @@ if "%~nx0"=="SDK-[NEW].bat" (
     >nul move /y "%~nx0" "SDK.bat" && start "" "SDK.bat" && exit 0
 )
 
-set SDK_VERSION=1.0.0.1
+set SDK_VERSION=1.0.0.0
 set "SDK_CONFIG=config.ini"
 
 :: <REPO SETTINGS>
@@ -41,7 +41,7 @@ if not "!CHECKED_AT!"=="!DATE!" (
     if defined SERVER_SDK_VERSION (
         if not "!SDK_VERSION!"=="!SERVER_SDK_VERSION!" (
 
-        curl.exe -fs#ko "SDK-[NEW].bat" "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK.bat"
+        curl.exe -Lfs#ko "SDK-[NEW].bat" "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK.bat"
 
         if not exist "SDK-[NEW].bat" (
             echo:
