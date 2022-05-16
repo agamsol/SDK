@@ -49,8 +49,6 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
                 "%~nx0" [THIS IS THE NEW VERSION]
             )
          REM /START THE NEW UPDATE
-
-         exit /b 0
          )
      ) else (
          echo:
