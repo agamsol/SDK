@@ -6,10 +6,11 @@ if "%~nx0"=="SDK-[NEW].bat" (
     for /f "tokens=2 delims=," %%A in ('2^>nul tasklist /v /nh /fo csv /fi "imagename eq cmd.exe" ^| findstr /c:"SDK-[NEW] - SDK UPDATE"') do (
         >nul 2>&1 taskkill /f /pid "%%~A" /t
     )
-    >nul move /y "%~nx0" "SDK.bat" && start "" "SDK.bat" && exit 0
+    >nul move /y "%~nx0" "SDK.bat"
+    "SDK.bat"
 )
 
-set SDK_VERSION=1.0.0.0
+set SDK_VERSION=1.0.0.1
 set "SDK_CONFIG=config.ini"
 
 :: <REPO SETTINGS>
@@ -63,38 +64,46 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
 :: </CHECK FOR SDK UPDATES>
 
 :: <UPDATE ALL LIBRARIES>
-REM GET LIBRARIES
-curl -Lks "!REPO_FULL!/Libraries/Libraries.ini"
-exit /b
-for /f "delims=" %%a in ('dir /b "Libraries\*"') do (
-    REM CHECK IF META FILE EXISTS AND LOAD ITS INFORMATION
-    if exist "Libraries\%%a\META.ini" (
-        set VERSION=
-        set SERVER_VERSION=
-        call :LOAD_CONFIG "Libraries\%%a\META.ini"
-        for /f "delims=" %%a in ('curl -Lsk "!REPO_FULL!/Libraries/%%a/META.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
 
-        if not "!VERSION!"=="!SERVER_VERSION!" (
-            echo NEW UPDATE AVAILABLE FOR THE LIBRARY: %%a
-            REM INSTALL THE UPDATE OF THE LIBRARY
-            echo Updating Library: !REPO_FULL!/Libraries/%%a
-            del /s /q "Libraries\%%a\*">nul
-            curl --create-dirs -#Lkso "Libraries\%%a\%%a.bat" "!REPO_FULL!/Libraries/%%a/%%a.bat"
-            curl --create-dirs -#Lkso "Libraries\%%a\META.ini" "!REPO_FULL!/Libraries/%%a/META.ini"
-        )
-    ) else (
-        echo LIBRARY DOESNT EXIST IN THIS PC: %%a
-        REM INSTALL LIBRARY FOR THE FIRST TIME
-        echo Downloading Library: !REPO_FULL!/Libraries/%%a
-        curl --create-dirs -#Lkso "Libraries\%%a\%%a.bat" "!REPO_FULL!/Libraries/%%a/%%a.bat"
-        curl --create-dirs -#Lkso "Libraries\%%a\META.ini" "!REPO_FULL!/Libraries/%%a/META.ini"
+if not "!CHECKED_AT!"=="!DATE!" (
+    if exist "%temp%\DOSLib\Libraries.ini" (
+        del /s /q "%temp%\DOSLib\Libraries.ini">nul
     )
 )
+if not exist "%temp%\DOSLib\Libraries.ini" (
+    echo Downloading Library DATA . . .
+    >nul curl --create-dirs -Lks "!REPO_FULL!/Libraries/Libraries.ini" -o "%temp%\DOSLib\Libraries.ini"
+)
+
+call :LOAD_CONFIG "%temp%\DOSLib\Libraries.ini"
+
+for %%a in (!LIBRARIES!) do (
+    REM CHECK IF THE LIBRARY IS ENABLED
+    if /i not "!%%a!"=="false" (
+        if exist "Libraries\%%a\META.ini" (
+            set VERSION=
+            set SERVER_VERSION=
+            call :LOAD_CONFIG "Libraries\%%a\META.ini"
+            for /f "delims=" %%a in ('curl -Lsk "!REPO_FULL!/Libraries/%%a/META.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
+
+            if not "!VERSION!"=="!SERVER_VERSION!" (
+                REM INSTALL THE UPDATE OF THE LIBRARY
+                del /s /q "Libraries\%%a\*">nul
+                for %%b in (META.ini "%%a.bat") do <nul curl --create-dirs -#Lkso "Libraries\%%a\%%~b" "!REPO_FULL!/Libraries/%%a/%%~b"
+            )
+        ) else (
+            REM INSTALL LIBRARY
+            for %%b in (META.ini "%%a.bat") do <nul curl --create-dirs -#Lkso "Libraries\%%a\%%~b" "!REPO_FULL!/Libraries/%%a/%%~b"
+        )
+        echo Library[%%a]=%~dp0Libraries\%%a\%%a.bat
+    )
+
+)
+
+
 
 :: </UPDATE ALL LIBRARIES>
-echo ended process
-pause
-exit /b
+exit /b 0
 
 :: <LOAD CONFIG>
 :LOAD_CONFIG
