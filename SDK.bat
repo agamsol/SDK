@@ -6,11 +6,13 @@ if "%~nx0"=="SDK-[NEW].bat" (
     for /f "tokens=2 delims=," %%A in ('2^>nul tasklist /v /nh /fo csv /fi "imagename eq cmd.exe" ^| findstr /c:"SDK-[NEW] - SDK UPDATE"') do (
         >nul 2>&1 taskkill /f /pid "%%~A" /t
     )
-    >nul move /y "%~nx0" "SDK.bat"
-    "SDK.bat"
+    (
+        >nul move /y "%~nx0" "SDK.bat"
+        "SDK.bat"
+    )
 )
 
-set SDK_VERSION=1.0.0.1
+set SDK_VERSION=1.0.0.0
 set "SDK_CONFIG=config.ini"
 
 :: <REPO SETTINGS>
