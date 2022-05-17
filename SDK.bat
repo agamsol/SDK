@@ -6,10 +6,8 @@ if "%~1"=="UPDATER" (
 setlocal enabledelayedexpansion
 pushd %~dp0
 
-set SDK_VERSION=1.0.0.1
+set SDK_VERSION=1.0.0.0
 set "SDK_CONFIG=config.ini"
-
-REM OLD VERSION?
 
 :: <REPO SETTINGS>
 set "REPO_BASE_URL=https://github.com/"
@@ -38,7 +36,6 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
      set "CHECKED_AT=!DATE!"
      call :CREATE_CONFIG
      for /f "delims=" %%a in ('curl -sLk "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK-Version.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
-     ECHO SERVER_SDK_VERSION: !SERVER_SDK_VERSION!
      if defined SERVER_SDK_VERSION (
          if not "!SDK_VERSION!"=="!SERVER_SDK_VERSION!" (
          if exist "SDK-[NEW].bat" del "SDK-[NEW].bat"
