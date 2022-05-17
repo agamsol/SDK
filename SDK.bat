@@ -6,13 +6,15 @@ if "%~1"=="UPDATER" (
 setlocal enabledelayedexpansion
 pushd %~dp0
 
-set SDK_VERSION=1.0.0.0
+set SDK_VERSION=1.0.0.1
 set "SDK_CONFIG=config.ini"
+
+REM OLD VERSION?
 
 :: <REPO SETTINGS>
 set "REPO_BASE_URL=https://github.com/"
 set "REPO_USER=agamsol/DOSLib-SDK"
-set "REPO_BRANCH=!SDK_VERSION!"
+set "REPO_BRANCH=1.0.0.0"
 set "REPO_FULL=!REPO_BASE_URL!!REPO_USER!/raw/!REPO_BRANCH!"
 :: <REPO SETTINGS>
 
@@ -36,9 +38,11 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
      set "CHECKED_AT=!DATE!"
      call :CREATE_CONFIG
      for /f "delims=" %%a in ('curl -sLk "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK-Version.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
+     ECHO SERVER_SDK_VERSION: !SERVER_SDK_VERSION!
      if defined SERVER_SDK_VERSION (
          if not "!SDK_VERSION!"=="!SERVER_SDK_VERSION!" (
          if exist "SDK-[NEW].bat" del "SDK-[NEW].bat"
+
          curl.exe -fLs#ko "SDK-[NEW].bat" "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK.bat"
 
          if not exist "SDK-[NEW].bat" (
@@ -69,6 +73,7 @@ if not "!CHECKED_AT!"=="!DATE!" (
         del /s /q "%temp%\DOSLib\Libraries.ini">nul
     )
 )
+
 if not exist "%temp%\DOSLib\Libraries.ini" (
     echo Downloading Library DATA . . .
     >nul curl --create-dirs -Lks "!REPO_FULL!/Libraries/Libraries.ini" -o "%temp%\DOSLib\Libraries.ini"
