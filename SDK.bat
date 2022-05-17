@@ -51,7 +51,7 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
          REM START THE NEW UPDATE
             (
                 >nul move /y "SDK-[NEW].bat" "%~f0"
-                "%~f0" UPDATER
+                call "%~f0" UPDATER
             )
          REM /START THE NEW UPDATE
          exit /b 0
