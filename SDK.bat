@@ -1,4 +1,8 @@
 @echo off
+if "%~1"=="UPDATER" (
+    echo this version is now up to date.
+    pause
+)
 setlocal enabledelayedexpansion
 pushd %~dp0
 
@@ -34,8 +38,8 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
      for /f "delims=" %%a in ('curl -sLk "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK-Version.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
      if defined SERVER_SDK_VERSION (
          if not "!SDK_VERSION!"=="!SERVER_SDK_VERSION!" (
-
-         curl.exe -Ls#ko "SDK-[NEW].bat" "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK.bat"
+         if exist "SDK-[NEW].bat" del "SDK-[NEW].bat"
+         curl.exe -fLs#ko "SDK-[NEW].bat" "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK.bat"
 
          if not exist "SDK-[NEW].bat" (
              echo:
@@ -45,10 +49,11 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
 
          REM START THE NEW UPDATE
             (
-                >nul move /y "SDK-[NEW].bat" "%~nx0"
-                "%~nx0" [THIS IS THE NEW VERSION]
+                >nul move /y "SDK-[NEW].bat" "%~f0"
+                "%~f0" UPDATER
             )
          REM /START THE NEW UPDATE
+         exit /b 0
          )
      ) else (
          echo:
