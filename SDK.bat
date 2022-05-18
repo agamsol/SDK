@@ -1,8 +1,4 @@
 @echo off
-if "%~1"=="UPDATER" (
-    echo this version is now up to date.
-    pause
-)
 setlocal enabledelayedexpansion
 pushd %~dp0
 
@@ -48,6 +44,7 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
              exit /b 1
          )
 
+         echo INFO: Update complete . . .
          REM START THE NEW UPDATE
             (
                 >nul move /y "SDK-[NEW].bat" "%~f0"
@@ -99,10 +96,7 @@ for %%a in (!LIBRARIES!) do (
         )
         echo Library[%%a]=%~dp0Libraries\%%a\%%a.bat
     )
-
 )
-
-
 
 :: </UPDATE ALL LIBRARIES>
 exit /b 0
