@@ -29,6 +29,9 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
 
 :: <CHECK FOR SDK UPDATES>
  if not "!CHECKED_AT!"=="!DATE!" (
+     if exist "%temp%\DOSLib\Libraries.ini" (
+        del /s /q "%temp%\DOSLib\Libraries.ini">nul
+     )
      set "CHECKED_AT=!DATE!"
      call :CREATE_CONFIG
      for /f "delims=" %%a in ('curl -sLk "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK-Version.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
@@ -44,7 +47,6 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
              exit /b 1
          )
 
-         echo INFO: Update complete . . .
          REM START THE NEW UPDATE
             (
                 >nul move /y "SDK-[NEW].bat" "%~f0"
@@ -61,15 +63,7 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
 :: </CHECK FOR SDK UPDATES>
 
 :: <UPDATE ALL LIBRARIES>
-
-if not "!CHECKED_AT!"=="!DATE!" (
-    if exist "%temp%\DOSLib\Libraries.ini" (
-        del /s /q "%temp%\DOSLib\Libraries.ini">nul
-    )
-)
-
 if not exist "%temp%\DOSLib\Libraries.ini" (
-    echo Downloading Library DATA . . .
     >nul curl --create-dirs -Lks "!REPO_FULL!/Libraries/Libraries.ini" -o "%temp%\DOSLib\Libraries.ini"
 )
 
