@@ -62,12 +62,12 @@ if not defined SDK_CURL set "SDK_CURL=curl.exe"
 
 :: <CHECK FOR SDK UPDATES>
  if not "!CHECKED_AT!"=="!DATE!" (
-     if exist "%temp%\DOSLib\Libraries.ini" (
-        del /s /q "%temp%\DOSLib\Libraries.ini">nul
+     if exist "Libraries\Libraries.ini" (
+        del /s /q "Libraries\Libraries.ini">nul
      )
      set "CHECKED_AT=!DATE!"
      call :CREATE_CONFIG
-     for /f "delims=" %%a in ('"!SDK_CURL!" -sLk "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK-Version.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
+     for /f "delims=" %%a in ('call "!SDK_CURL!" -sLk "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK-Version.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
      if defined SERVER_SDK_VERSION (
          if not "!SDK_VERSION!"=="!SERVER_SDK_VERSION!" (
          if exist "SDK-[NEW].bat" del "SDK-[NEW].bat"
@@ -96,11 +96,11 @@ if not defined SDK_CURL set "SDK_CURL=curl.exe"
 :: </CHECK FOR SDK UPDATES>
 
 :: <UPDATE ALL LIBRARIES>
-if not exist "%temp%\DOSLib\Libraries.ini" (
-    >nul "!SDK_CURL!" --create-dirs -Lks "!REPO_FULL!/Libraries/Libraries.ini" -o "%temp%\DOSLib\Libraries.ini"
+if not exist "Libraries\Libraries.ini" (
+    >nul call "!SDK_CURL!" --create-dirs -Lks "!REPO_FULL!/Libraries/Libraries.ini" -o "Libraries\Libraries.ini"
 )
 
-call :LOAD_CONFIG "%temp%\DOSLib\Libraries.ini"
+call :LOAD_CONFIG "Libraries\Libraries.ini"
 
 for %%a in (!LIBRARIES!) do (
     REM CHECK IF THE LIBRARY IS ENABLED
@@ -110,7 +110,7 @@ for %%a in (!LIBRARIES!) do (
             set SERVER_VERSION=
             call :LOAD_CONFIG "Libraries\%%a\META.ini"
 
-            for /f "delims=" %%a in ('"!SDK_CURL!" -Lsk "!REPO_FULL!/Libraries/%%a/META.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
+            for /f "delims=" %%a in ('call "!SDK_CURL!" -Lsk "!REPO_FULL!/Libraries/%%a/META.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
 
             if not "!VERSION!"=="!SERVER_VERSION!" (
                 REM INSTALL THE UPDATE OF THE LIBRARY
