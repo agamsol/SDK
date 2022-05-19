@@ -12,6 +12,37 @@ set "REPO_BRANCH=1.0.0.0"
 set "REPO_FULL=!REPO_BASE_URL!!REPO_USER!/raw/!REPO_BRANCH!"
 :: <REPO SETTINGS>
 
+:: <LOAD ARGS>
+:LOAD_ARGS
+if not "%~1"=="" (
+    set /a Args_count+=1
+    set "Arg[!Args_count!]=%~1"
+    SHIFT
+    GOTO :LOAD_ARGS
+)
+
+for /L %%a in (1 1 !Args_count!) do (
+    for %%b in (CURL) do (
+        if /i "!Arg[%%a]!"=="--%%b" (
+            set /a "NextArg=%%a+1"
+            for /f "delims=" %%c in ("!NextArg!") do (
+                if /i "%%b"=="curl" (
+                    if not defined Arg[%%c] (
+                        echo ERROR=CURL build not specified.
+                        exit /b 1
+                    )
+                    if not exist "!Arg[%%c]!" (
+                        echo ERROR=CURL build file not found.
+                        exit /b 1
+                    )
+                    set "SDK_CURL=!Arg[%%c]!"
+                )
+            )
+        )
+    )
+)
+:: </LOAD ARGS>
+
 :: <INTERNET CONNECTION CHECK>
  ping -n 1 github.com | findstr /c:"TTL">nul || (
      echo:
@@ -27,6 +58,8 @@ if not exist "!SDK_CONFIG!" (
 
 call :LOAD_CONFIG "!SDK_CONFIG!"
 
+if not defined SDK_CURL set "SDK_CURL=curl.exe"
+
 :: <CHECK FOR SDK UPDATES>
  if not "!CHECKED_AT!"=="!DATE!" (
      if exist "%temp%\DOSLib\Libraries.ini" (
@@ -34,12 +67,12 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
      )
      set "CHECKED_AT=!DATE!"
      call :CREATE_CONFIG
-     for /f "delims=" %%a in ('curl -sLk "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK-Version.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
+     for /f "delims=" %%a in ('"!SDK_CURL!" -sLk "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK-Version.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
      if defined SERVER_SDK_VERSION (
          if not "!SDK_VERSION!"=="!SERVER_SDK_VERSION!" (
          if exist "SDK-[NEW].bat" del "SDK-[NEW].bat"
 
-         curl.exe -fLs#ko "SDK-[NEW].bat" "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK.bat"
+         "!SDK_CURL!" -fLs#ko "SDK-[NEW].bat" "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK.bat"
 
          if not exist "SDK-[NEW].bat" (
              echo:
@@ -64,7 +97,7 @@ call :LOAD_CONFIG "!SDK_CONFIG!"
 
 :: <UPDATE ALL LIBRARIES>
 if not exist "%temp%\DOSLib\Libraries.ini" (
-    >nul curl --create-dirs -Lks "!REPO_FULL!/Libraries/Libraries.ini" -o "%temp%\DOSLib\Libraries.ini"
+    >nul "!SDK_CURL!" --create-dirs -Lks "!REPO_FULL!/Libraries/Libraries.ini" -o "%temp%\DOSLib\Libraries.ini"
 )
 
 call :LOAD_CONFIG "%temp%\DOSLib\Libraries.ini"
@@ -77,21 +110,20 @@ for %%a in (!LIBRARIES!) do (
             set SERVER_VERSION=
             call :LOAD_CONFIG "Libraries\%%a\META.ini"
 
-            for /f "delims=" %%a in ('curl -Lsk "!REPO_FULL!/Libraries/%%a/META.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
+            for /f "delims=" %%a in ('"!SDK_CURL!" -Lsk "!REPO_FULL!/Libraries/%%a/META.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
 
             if not "!VERSION!"=="!SERVER_VERSION!" (
                 REM INSTALL THE UPDATE OF THE LIBRARY
                 del /s /q "Libraries\%%a\*">nul
-                for %%b in (META.ini "%%a.bat") do <nul curl --create-dirs -#Lkso "Libraries\%%a\%%~b" "!REPO_FULL!/Libraries/%%a/%%~b"
+                for %%b in (META.ini "%%a.bat") do <nul "!SDK_CURL!" --create-dirs -#Lkso "Libraries\%%a\%%~b" "!REPO_FULL!/Libraries/%%a/%%~b"
             )
         ) else (
             REM INSTALL LIBRARY
-            for %%b in (META.ini "%%a.bat") do <nul curl --create-dirs -#Lkso "Libraries\%%a\%%~b" "!REPO_FULL!/Libraries/%%a/%%~b"
+            for %%b in (META.ini "%%a.bat") do <nul "!SDK_CURL!" --create-dirs -#Lkso "Libraries\%%a\%%~b" "!REPO_FULL!/Libraries/%%a/%%~b"
         )
         echo Library[%%a]=%~dp0Libraries\%%a\%%a.bat
     )
 )
-
 :: </UPDATE ALL LIBRARIES>
 exit /b 0
 
@@ -107,7 +139,9 @@ exit /b
     echo ; SOFTWARE DEVELOPMENT KIT AUTOMATED CONFIG
     echo [UPDATES]
     echo CHECKED_AT=!CHECKED_AT!
+    echo:
+    echo [LIBRARY]
+    echo SDK_CURL=!SDK_CURL!
 )
 exit /b
 :: </CREATE_CONFIG>
-
