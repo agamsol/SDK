@@ -36,6 +36,7 @@ for /L %%a in (1 1 !Args_count!) do (
                         exit /b 1
                     )
                     set "SDK_CURL=!Arg[%%c]!"
+                    set ENV_UPDATE=true
                 )
             )
         )
@@ -57,6 +58,13 @@ if not exist "!SDK_CONFIG!" (
 )
 
 call :LOAD_CONFIG "!SDK_CONFIG!"
+
+if exist "Libraries\env.ini" call :LOAD_CONFIG "Libraries\env.ini"
+
+if "!ENV_UPDATE!"=="true" (
+    set ENV_UPDATE=false
+    call :CREATE_ENVIRONMENT
+)
 
 if not defined SDK_CURL set "SDK_CURL=curl.exe"
 
@@ -97,7 +105,7 @@ if not defined SDK_CURL set "SDK_CURL=curl.exe"
 
 :: <UPDATE ALL LIBRARIES>
 if not exist "Libraries\Libraries.ini" (
-    >nul call "!SDK_CURL!" --create-dirs -Lks "!REPO_FULL!/Libraries/Libraries.ini" -o "Libraries\Libraries.ini"
+    >nul call "!SDK_CURL!" --create-dirs -Lkso "Libraries\Libraries.ini" "!REPO_FULL!/Libraries/Libraries.ini"
 )
 
 call :LOAD_CONFIG "Libraries\Libraries.ini"
@@ -133,15 +141,22 @@ for /f "tokens=*" %%a in ('type "%~1"') do <nul set /p=%%a | findstr /rc:"^[\[#]
 exit /b
 :: </LOAD CONFIG>
 
+:: <CREATE_ENVIRONMENT>
+:CREATE_ENVIRONMENT
+>"Library\env.ini" (
+    echo ; THESE VARIABLES WILL BE APPLIED TO EVERY LIBRARY IN THE SDK
+    echo [ENVIRONMENT]
+    echo SDK_CURL=!SDK_CURL!
+)
+exit /b
+:: </CREATE_ENVIRONMENT>
+
 :: <CREATE_CONFIG>
 :CREATE_CONFIG
 >"!SDK_CONFIG!" (
     echo ; SOFTWARE DEVELOPMENT KIT AUTOMATED CONFIG
     echo [UPDATES]
     echo CHECKED_AT=!CHECKED_AT!
-    echo:
-    echo [LIBRARY]
-    echo SDK_CURL=!SDK_CURL!
 )
 exit /b
 :: </CREATE_CONFIG>
