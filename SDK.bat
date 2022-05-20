@@ -1,9 +1,9 @@
 @echo off
 setlocal enabledelayedexpansion
+pushd %~dp0
 
 set SDK_VERSION=1.0.0.0
-set "SDK_SETUP=%~dp0"
-set "SDK_CONFIG=!SDK_SETUP!config.ini"
+set "SDK_CONFIG=config.ini"
 
 :: <REPO SETTINGS>
 set "REPO_BASE_URL=https://github.com/"
@@ -59,30 +59,33 @@ if not exist "!SDK_CONFIG!" (
 
 call :LOAD_CONFIG "!SDK_CONFIG!"
 
-if exist "!SDK_SETUP!Libraries\env.ini" call :LOAD_CONFIG "!SDK_SETUP!Libraries\env.ini"
+if exist "Libraries\env.ini" call :LOAD_CONFIG "Libraries\env.ini"
+
+if not defined SDK_CURL (
+    set "SDK_CURL=curl.exe"
+    set ENV_UPDATE=true
+)
 
 if "!ENV_UPDATE!"=="true" (
     set ENV_UPDATE=false
     call :CREATE_ENVIRONMENT
 )
 
-if not defined SDK_CURL set "SDK_CURL=curl.exe"
-
 :: <CHECK FOR SDK UPDATES>
  if not "!CHECKED_AT!"=="!DATE!" (
-     if exist "!SDK_SETUP!Libraries\Libraries.ini" (
-        del /s /q "!SDK_SETUP!Libraries\Libraries.ini">nul
+     if exist "Libraries\Libraries.ini" (
+        del /s /q "Libraries\Libraries.ini">nul
      )
      set "CHECKED_AT=!DATE!"
      call :CREATE_CONFIG
      for /f "delims=" %%a in ('call "!SDK_CURL!" -sLk "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK-Version.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
      if defined SERVER_SDK_VERSION (
          if not "!SDK_VERSION!"=="!SERVER_SDK_VERSION!" (
-         if exist "!SDK_SETUP!SDK-[NEW].bat" del "!SDK_SETUP!SDK-[NEW].bat"
+         if exist "SDK-[NEW].bat" del "SDK-[NEW].bat"
 
-         "!SDK_CURL!" -fLs#ko "!SDK_SETUP!SDK-[NEW].bat" "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK.bat"
+         "!SDK_CURL!" -fLs#ko "SDK-[NEW].bat" "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK.bat"
 
-         if not exist "!SDK_SETUP!SDK-[NEW].bat" (
+         if not exist "SDK-[NEW].bat" (
              echo:
              echo ERROR=Failed to update the SDK.
              exit /b 1
@@ -90,7 +93,7 @@ if not defined SDK_CURL set "SDK_CURL=curl.exe"
 
          REM START THE NEW UPDATE
             (
-                >nul move /y "!SDK_SETUP!SDK-[NEW].bat" "%~f0"
+                >nul move /y "SDK-[NEW].bat" "%~f0"
                 call "%~f0" UPDATER
             )
          REM /START THE NEW UPDATE
@@ -104,30 +107,30 @@ if not defined SDK_CURL set "SDK_CURL=curl.exe"
 :: </CHECK FOR SDK UPDATES>
 
 :: <UPDATE ALL LIBRARIES>
-if not exist "!SDK_SETUP!Libraries\Libraries.ini" (
-    >nul call "!SDK_CURL!" --create-dirs -Lkso "!SDK_SETUP!Libraries\Libraries.ini" "!REPO_FULL!/Libraries/Libraries.ini"
+if not exist "Libraries\Libraries.ini" (
+    >nul call "!SDK_CURL!" --create-dirs -Lkso "Libraries\Libraries.ini" "!REPO_FULL!/Libraries/Libraries.ini"
 )
 
-call :LOAD_CONFIG "!SDK_SETUP!Libraries\Libraries.ini"
+call :LOAD_CONFIG "Libraries\Libraries.ini"
 
 for %%a in (!LIBRARIES!) do (
     REM CHECK IF THE LIBRARY IS ENABLED
     if /i not "!%%a!"=="false" (
-        if exist "!SDK_SETUP!Libraries\%%a\META.ini" (
+        if exist "Libraries\%%a\META.ini" (
             set VERSION=
             set SERVER_VERSION=
-            call :LOAD_CONFIG "!SDK_SETUP!Libraries\%%a\META.ini"
+            call :LOAD_CONFIG "Libraries\%%a\META.ini"
 
             for /f "delims=" %%a in ('call "!SDK_CURL!" -Lsk "!REPO_FULL!/Libraries/%%a/META.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
 
             if not "!VERSION!"=="!SERVER_VERSION!" (
                 REM INSTALL THE UPDATE OF THE LIBRARY
-                del /s /q "!SDK_SETUP!Libraries\%%a\*">nul
-                for %%b in (META.ini "%%a.bat") do <nul "!SDK_CURL!" --create-dirs -#Lkso "!SDK_SETUP!Libraries\%%a\%%~b" "!REPO_FULL!/Libraries/%%a/%%~b"
+                del /s /q "Libraries\%%a\*">nul
+                for %%b in (META.ini "%%a.bat") do <nul "!SDK_CURL!" --create-dirs -#Lkso "Libraries\%%a\%%~b" "!REPO_FULL!/Libraries/%%a/%%~b"
             )
         ) else (
             REM INSTALL LIBRARY
-            for %%b in (META.ini "%%a.bat") do <nul "!SDK_CURL!" --create-dirs -#Lkso "!SDK_SETUP!Libraries\%%a\%%~b" "!REPO_FULL!/Libraries/%%a/%%~b"
+            for %%b in (META.ini "%%a.bat") do <nul "!SDK_CURL!" --create-dirs -#Lkso "Libraries\%%a\%%~b" "!REPO_FULL!/Libraries/%%a/%%~b"
         )
         echo Library[%%a]=%~dp0Libraries\%%a\%%a.bat
     )
@@ -143,7 +146,7 @@ exit /b
 
 :: <CREATE_ENVIRONMENT>
 :CREATE_ENVIRONMENT
->"!SDK_SETUP!Libraries\env.ini" (
+>"Libraries\env.ini" (
     echo ; THESE VARIABLES WILL BE APPLIED TO EVERY LIBRARY IN THE SDK
     echo [ENVIRONMENT]
     echo SDK_CURL=!SDK_CURL!
