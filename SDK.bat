@@ -59,6 +59,7 @@ if not exist "!SDK_CONFIG!" (
 
 call :LOAD_CONFIG "!SDK_CONFIG!"
 
+if not exist "Libraries" md "Libraries"
 if exist "Libraries\env.ini" call :LOAD_CONFIG "Libraries\env.ini"
 
 if not defined SDK_CURL (
