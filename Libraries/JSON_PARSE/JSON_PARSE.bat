@@ -1,6 +1,13 @@
 @echo off
 setlocal enabledelayedexpansion
 
+:: <SDK_SYNC>
+for /f "delims=" %%a in ('dir /s /b "%~dp0..\env.ini"') do set "SDK_ENVIRONMENT=%%~a"
+
+if exist "!SDK_ENVIRONMENT!" (
+    for /f "delims=" %%a in ('type "!SDK_ENVIRONMENT!"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set %%a
+)
+
 :LOAD_ARGS
 if not "%~1"=="" (
     set /a Args_count+=1
@@ -36,6 +43,7 @@ for /L %%a in (1 1 !Args_count!) do (
         )
     )
 )
+:: </SDK_SYNC>
 
 for %%a in (FILE KEYS) do if not defined JsonParse_%%a (
     echo ERROR=You must specify 'file' and 'keys' using parameters.

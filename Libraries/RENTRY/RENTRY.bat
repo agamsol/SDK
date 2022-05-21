@@ -1,6 +1,18 @@
 @echo off
 setlocal enabledelayedexpansion
 
+:: <SDK_SYNC>
+for /f "delims=" %%a in ('dir /s /b "%~dp0..\env.ini"') do set "SDK_ENVIRONMENT=%%~a"
+
+if exist "!SDK_ENVIRONMENT!" (
+    for /f "delims=" %%a in ('type "!SDK_ENVIRONMENT!"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set %%a
+)
+:: </SDK_SYNC>
+
+:: <FORCE CUSTOM SETTINGS FOR SDK>
+set "temp.curl=!SDK_CURL!"
+:: </FORCE CUSTOM SETTINGS FOR SDK>
+
 REM -----------------------------
 REM  rentry.bat - Batch replica to the python version
 REM  Made by github.com/agamsol/rentry

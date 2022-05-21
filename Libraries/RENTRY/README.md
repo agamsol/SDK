@@ -1,3 +1,5 @@
+### 📚 Library - Rentry `[CUSTOM]`
+
 ### 🧾 RENTRY API - Batch Version
 > [rentry.org](https://rentry.org/) is markdown-powered pastebin/publishing service with preview, custom urls and editing.
 >
