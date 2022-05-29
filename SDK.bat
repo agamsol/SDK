@@ -55,7 +55,7 @@ for /L %%a in (1 1 !Args_count!) do (
                         echo ERROR=The location specified does not exist.
                         exit /b 1
                     )
-                    set "SDK_INSTALL_LOCATION=!Arg[%%c]!"
+                    for /f "delims=" %%d in ("!Arg[%%c]!") do set "SDK_INSTALL_LOCATION=%%~fd"
                     pushd "!Arg[%%c]!"
                 )
                 if /i "%%b"=="get-variables" (
@@ -184,7 +184,7 @@ call :LOAD_CONFIG "Libraries\Libraries.ini" Libraries
 
 for %%a in (!LIBRARIES!) do if not "!SDK_SPECIFIC_LIBRARIES!"=="!SDK_SPECIFIC_LIBRARIES:%%a=!" (
 
-    echo Fetching information: %%a
+        REM echo Fetching information: %%a
 
     for %%a in (ENABLED VERSION LIBRARY_NAME MAIN_SCRIPT) do (
         set LOCAL_%%a=
@@ -226,7 +226,7 @@ for %%a in (!LIBRARIES!) do if not "!SDK_SPECIFIC_LIBRARIES!"=="!SDK_SPECIFIC_LI
                 )
             )
         )
-        REM echo SDK[!SERVER_LIBRARY_NAME!]=%~dp0Libraries\!SERVER_LIBRARY_NAME!\!SERVER_MAIN_SCRIPT!
+        echo SDK[!SERVER_LIBRARY_NAME!]=!SDK_INSTALL_LOCATION!\Libraries\!SERVER_LIBRARY_NAME!\!SERVER_MAIN_SCRIPT!
     )
 )
 if !LIB_UPDATED! gtr 0 >nul 2>&1 del /s /q "Libraries\Libraries.ini"
