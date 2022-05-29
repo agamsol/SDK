@@ -1,37 +1,37 @@
-### 📚 Library - String Case Convertor
+### 📚 Library - Rick Roll
 
-> Convert a string to _lower_ \ _UPPER_ case.
+> Play the rickroll sound in background and prevent the user from easily pausing the music and the popping lyrics
 
 ### Usage:
-- `--string "<some_string>"` specify the string you'd like to convert
-- `--to-lower` Convert a string to _lower_ case
-- `--hex-to-plain` Convert a string to _UPPER_ case
+- `--clean [exit]` Specify to clean all old-cached files and start the library again _unless specified to exit after cleanup was done_
 
 ### 🔧 Examples
 
-- **Convert to _lower_ case**
+- **Start rick-roll in background**
 
 ```bat
-call "convert_case.bat" --string "MyString" --to-lower
+call "RICK_ROLL.bat"
 ```
 
-    Output: mystring
-
-- **Convert to _UPPER_ case**
+- **Clean cached files and start rick-roll in background**
 
 ```bat
-call "convert_case.bat" --string "MyString" --to-upper
+call "RICK_ROLL.bat" --clean
 ```
 
-     Output: MYSTRING
+- **Clean cached files only**
+
+```bat
+call "RICK_ROLL.bat" --clean exit
+```
 
 - **Response**
 
-    > This library returns its ERRORS as INI format and at success it will return the result string.
+    > This library returns its ERRORLEVELS (1 = ERROR) and 0 = success
 
 #### SDK LIBRARY INFORMATION
 > Version: 1.0
 >
-> Compatibility: Windows 7 - _(untested)_
+> Compatibility: Windows 7 - _(tested)_
 >
 > OFFICIAL SDK APP CREATED BY THE SDK AUTHOR

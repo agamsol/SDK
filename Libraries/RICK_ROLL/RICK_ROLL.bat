@@ -26,11 +26,9 @@ for /L %%a in (1 1 !Args_count!) do (
         if /i "!Arg[%%a]!"=="--%%b" (
             set /a "NextArg=%%a+1"
             for /f "delims=" %%c in ("!NextArg!") do (
-                if "%%b"=="clean" (
-                    if exist "!RickRollSound!" (
-                        rmdir /s /q "!RickRollSound!"
-                        if "!Arg[%%c]!"=="exit" exit /b 0
-                    )
+                if /i "%%b"=="clean" (
+                    if exist "!TEMP_FILES!" rmdir /s /q "!TEMP_FILES!"
+                    if /i "!Arg[%%c]!"=="exit" exit /b 0
                 )
             )
         )
@@ -38,7 +36,7 @@ for /L %%a in (1 1 !Args_count!) do (
 )
 :: </SDK_SYNC>
 
-if not exist "!RickRollSound!" >nul curl --create-dirs --ssl-no-revoke -fkLo "!RickRollSound!" "URL"
+if not exist "!RickRollSound!" >nul curl --create-dirs --ssl-no-revoke -fskLo "!RickRollSound!" "https://github.com/agamsol/DOSLib-SDK/raw/latest/Libraries/RICK_ROLL/RickRoll.mp3?raw=true"
 
 >"!TEMP_FILES!\background-audio.vbs" (
     echo dim oPlayer
@@ -130,7 +128,7 @@ for %%a in (
 ) do for /f "tokens=1,2 delims=`" %%b in (%%a) do call :MSGBOX_LYRICS_PLAYER %%b "%%c" || exit /b 0
 
 if defined msgboxPID >nul 2>&1 taskkill /f /pid "!msgboxPID!" /t
-echo done?
+if exist "!RickRollSound!" rmdir /s /q "!RickRollSound!"
 exit /b 0
 
 :MSGBOX_LYRICS_PLAYER
