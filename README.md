@@ -2,8 +2,8 @@
 > A script to sync all libraries that your scripts use often, preventing code duplications and syncing all libraries with variables that bring windows 7 compatible with most libraries and the SDK itself
 
 ## Table of contents
-* [How does this work?]()
-* [Libraries]()
+* [How does this work?](https://github.com/agamsol/SDK/tree/latest#how-does-this-work)
+* [Libraries](https://github.com/agamsol/SDK/tree/latest#libraries)
     * [JSON_PARSE](https://github.com/agamsol/SDK/tree/latest/Libraries/JSON_PARSE)
     * [RENTRY](https://github.com/agamsol/SDK/tree/latest/Libraries/RENTRY)
     * [DISCORD_WEBHOOK_CHECKER](https://github.com/agamsol/SDK/tree/latest/Libraries/DISCORD_WEBHOOK_CHECKER)
@@ -13,16 +13,16 @@
     * [STARTUP_TOOLS](https://github.com/agamsol/SDK/tree/latest/Libraries/STARTUP_TOOLS)
     * [STICKBUG](https://github.com/agamsol/SDK/tree/latest/Libraries/STICKBUG)
     * [RICK_ROLL](https://github.com/agamsol/SDK/tree/latest/Libraries/RICK_ROLL)
-* [Installation]()
-    * [Compatibility]()
-    * [Installing the SDK]()
-        * [STEP 1]()
-        * [STEP 2]()
-        * [STEP 3]()
-    * [Installing Specific libraries]()
-* [Using a library]()
-* [Support 💁‍♂️]()
-* [Buy me a coffee ☕]()
+* [Installation](https://github.com/agamsol/SDK/tree/latest#installation)
+    * [Compatibility](https://github.com/agamsol/SDK/tree/latest#compatibility)
+    * [Installing the SDK](https://github.com/agamsol/SDK/tree/latest#installing-the-sdk)
+        * [STEP 1](https://github.com/agamsol/SDK/tree/latest#step-1)
+        * [STEP 2](https://github.com/agamsol/SDK/tree/latest#step-2)
+        * [STEP 3](https://github.com/agamsol/SDK/tree/latest#step-3)
+    * [Installing Specific libraries](https://github.com/agamsol/SDK/tree/latest#installing-specific-libraries)
+* [Using a library](https://github.com/agamsol/SDK/tree/latest#using-a-library)
+* [Support 💁‍♂️](https://github.com/agamsol/SDK/tree/latest#support-%EF%B8%8F)
+* [Buy me a coffee ☕](https://github.com/agamsol/SDK/tree/latest#buy-me-a-coffee-)
 
 ## How does this work
 > SDK script which is being called at the start of your batch file is responsible for keeping the SDK and all other libraries up-to-date and returns all paths as INI format so that you can set and use them in your own script.
@@ -49,7 +49,7 @@
 ### Installing the SDK
 > You'd need to have a project file, the process of installation is done through your main working script
 
-#### STEP 1
+### STEP 1
 - Make sure you have delayed-expansion in your script. (You probably want to put it at line 2, right after `@echo off`)
 ```bat
 setlocal enabledelayedexpansion
@@ -60,7 +60,7 @@ setlocal enabledelayedexpansion
 set "SDK_LOCATION=%appdata%\SDK"
 ```
 
-#### STEP 2
+### STEP 2
 - At the very bottom of your script you'd want to paste the code snippet below, this part is responsible to install CURL and the SDK itself. - Make sure that your code never executes this line without calling it as a label
 
 ```bat
@@ -117,7 +117,7 @@ exit /b 0
 ```
 
 ### STEP 3
-> This part will make sure that your SDK is executed when your main script starts, you'd need to choose where to place it, before making your decision, I'd recommend you to import it at the very start of your script to also collect variables like `!SDK_CURL!`, this will allow your script to use CURL in lower systems than windows 10, as mentioned in the [Compatibility]() part.
+> This part will make sure that your SDK is executed when your main script starts, you'd need to choose where to place it, before making your decision, I'd recommend you to import it at the very start of your script to also collect variables like `!SDK_CURL!`, this will allow your script to use CURL in lower systems than windows 10, as mentioned in the [Compatibility](https://github.com/agamsol/SDK/tree/latest#compatibility) part.
 
 ```bat
 call :IMPORT_SDK && (
@@ -128,7 +128,7 @@ call :IMPORT_SDK && (
 ```
 
 ## Installing Specific libraries
-> This part will teach you how you can install specific library(ies). interaction with the SDK will be done by changing the `FOR` command at [STEP 3]()
+> This part will teach you how you can install specific library(ies). interaction with the SDK will be done by changing the `FOR` command at [STEP 3](https://github.com/agamsol/SDK/tree/latest#step-3)
 
 - You can grab the list of libraries that the SDK has by [clicking here](https://github.com/agamsol/SDK/blob/latest/Libraries/Libraries.ini)
 
@@ -158,7 +158,7 @@ call :IMPORT_SDK && (
 
 ## Using a library
 > To use a library you'd want to read its docs file and understand how it works, some libraries are easy to use and some are complex
-> You can visit the [Table of contents]() for all possible libraries and links to them.
+> You can visit the [Table of contents](https://github.com/agamsol/SDK/tree/latest#table-of-contents) for all possible libraries and links to them.
 
 - I want to use the library `HEXADECIMAL` for this example
 
