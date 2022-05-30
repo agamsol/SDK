@@ -7,7 +7,7 @@ set "DEFAULT_INSTALL_LOCATION=%~f0"
 
 :: <REPO SETTINGS>
 set "REPO_BASE_URL=https://github.com/"
-set "REPO_USER=agamsol/DOSLib-SDK"
+set "REPO_USER=agamsol/SDK"
 set "REPO_BRANCH=1.0.0.0"
 set "REPO_FULL=!REPO_BASE_URL!!REPO_USER!/raw/!REPO_BRANCH!"
 :: <REPO SETTINGS>
@@ -49,6 +49,10 @@ for /L %%a in (1 1 !Args_count!) do (
                 if /i "%%b"=="install-location" (
                     if not defined Arg[%%c] (
                         echo ERROR=You did not specify the location to install the SDK in.
+                        exit /b 1
+                    )
+                    if not exist "!Arg[%%c]!" (
+                        echo ERROR=The location specified does not exist.
                         exit /b 1
                     )
                     for /f "delims=" %%d in ("!Arg[%%c]!") do set "SDK_INSTALL_LOCATION=%%~fd"
@@ -156,6 +160,7 @@ if "!EXIT!"=="true" exit /b
 
          >nul 2>&1 del /s /q "config.ini"
 
+            echo ARGS: !ALL_ARGS!
          REM START THE NEW UPDATE
             (
                 >nul move /y "SDK-[NEW].bat" "!DEFAULT_INSTALL_LOCATION!"
