@@ -51,10 +51,6 @@ for /L %%a in (1 1 !Args_count!) do (
                         echo ERROR=You did not specify the location to install the SDK in.
                         exit /b 1
                     )
-                    if not exist "!Arg[%%c]!" (
-                        echo ERROR=The location specified does not exist.
-                        exit /b 1
-                    )
                     for /f "delims=" %%d in ("!Arg[%%c]!") do set "SDK_INSTALL_LOCATION=%%~fd"
                     pushd "!Arg[%%c]!"
                 )
