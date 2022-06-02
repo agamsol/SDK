@@ -5,7 +5,7 @@
 ### Usage:
 - `--string "<some_string>"` specify the string you'd like to convert
 - `--to-lower` Convert a string to _lower_ case
-- `--hex-to-plain` Convert a string to _UPPER_ case
+- `--to-upper` Convert a string to _UPPER_ case
 
 ### 🔧 Examples
 
