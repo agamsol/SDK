@@ -42,16 +42,19 @@ if not defined STRING (
 )
 
 if "!CLI_MODE!"=="lower" (
-    for %%a in ("A=a" "B=b" "C=c" "D=d" "E=e" "F=f" "G=g" "H=h" "I=i" "J=j" "K=k" "L=l" "M=m" "N=n" "O=o" "P=p" "Q=q" "R=r" "S=s" "T=t" "U=u" "V=v" "W=w" "X=x" "Y=y" "Z=z") do call set STRING=%%STRING:%%~a%%
+    for %%a in (a b c d e f g h i j k l m n o p q r s t u v w x y z) do call set STRING=!STRING:%%~a=%%~a!
     echo !STRING!
     exit /b 0
 )
 
 if "!CLI_MODE!"=="upper" (
-    for %%a in ("z=Z" "y=Y" "x=X" "w=W" "v=V" "u=U" "t=T" "s=S" "r=R" "q=Q" "p=P" "o=O" "n=N" "m=M" "l=L" "k=K" "j=J" "i=I" "h=H" "g=G" "f=F" "e=E" "d=D" "c=C" "b=B" "a=A") do call set STRING=%%STRING:%%~a%%
+    for %%a in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do call set STRING=!STRING:%%~a=%%~a!
     echo !STRING!
     exit /b 0
 )
 
 echo ERROR=Mode not defined, consider using '--to-lower' or '--to-upper'.
 exit /b 1
+
+REM a b c d e f g h i j k l m n o p q r s t u v w x y z
+REM A B C D E F G H I J K L M N O P Q R S T U V W X Y Z

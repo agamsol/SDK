@@ -1,14 +1,14 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set SDK_VERSION=1.0.0.0
+set SDK_VERSION=1.0.0.1
 set "SDK_CONFIG=config.ini"
 set "DEFAULT_INSTALL_LOCATION=%~f0"
 
 :: <REPO SETTINGS>
 set "REPO_BASE_URL=https://github.com/"
 set "REPO_USER=agamsol/SDK"
-set "REPO_BRANCH=1.0.0.0"
+set "REPO_BRANCH=1.0.0.1"
 set "REPO_FULL=!REPO_BASE_URL!!REPO_USER!/raw/!REPO_BRANCH!"
 :: <REPO SETTINGS>
 
@@ -160,7 +160,8 @@ if "!EXIT!"=="true" exit /b
 
          >nul 2>&1 del /s /q "config.ini"
 
-            echo ARGS: !ALL_ARGS!
+         pushd "%~dp0"
+
          REM START THE NEW UPDATE
             (
                 >nul move /y "SDK-[NEW].bat" "!DEFAULT_INSTALL_LOCATION!"

@@ -1,4 +1,4 @@
-## 📚 Batch Software Development Kit - 1.0.0.0
+## 📚 Batch Software Development Kit - 1.0.0.1
 > A script to sync all libraries that your scripts use often, preventing code duplications and syncing all libraries with variables that bring windows 7 compatible with most libraries and the SDK itself
 
 ## Table of contents
@@ -13,6 +13,7 @@
     * [STARTUP_TOOLS](https://github.com/agamsol/SDK/tree/latest/Libraries/STARTUP_TOOLS)
     * [STICKBUG](https://github.com/agamsol/SDK/tree/latest/Libraries/STICKBUG)
     * [RICK_ROLL](https://github.com/agamsol/SDK/tree/latest/Libraries/RICK_ROLL)
+* [Change Log](https://github.com/agamsol/SDK/tree/latest#change-log)
 * [Installation](https://github.com/agamsol/SDK/tree/latest#installation)
     * [Compatibility](https://github.com/agamsol/SDK/tree/latest#compatibility)
     * [Installing the SDK](https://github.com/agamsol/SDK/tree/latest#installing-the-sdk)
@@ -30,6 +31,10 @@
 ## Libraries
 > Each library is responsible for doing a specific task related to a different topic (Eg. Checking wether a discord webhook URL works or not)
 
+## Change Log
+- Fixed a problem while using `--install-location`
+
+    If this parameter is defined and there is update available the SDK will try to pushed to the same file 2 times.
 
 ## Installation
 > A part of the SDK installation script is responsible for installing [CURL](https://curl.se/) this dependecy allows to download files on older versions of windows, the other parts are responsible to validate the file installed works and starting the SDK installation
@@ -57,6 +62,7 @@ setlocal enabledelayedexpansion
 - We'd want to paste the settings for the SDK at the TOP of your script, assuming you have a place to paste your main script settings you may also add this one as a setting.
 
 ```bat
+if defined ProgramFiles(x86) (set SYSTEM_BITS=64) else set SYSTEM_BITS=86
 set "SDK_LOCATION=%appdata%\SDK"
 ```
 
@@ -67,42 +73,37 @@ set "SDK_LOCATION=%appdata%\SDK"
 :: <IMPORT SDK>
 :IMPORT_SDK
 set SDK_CURL=
-if not exist "%SDK_LOCATION%" md "%SDK_LOCATION%"
+if not exist "!SDK_LOCATION!" md "!SDK_LOCATION!"
 for /f "delims=" %%a in ('2^>nul where curl.exe ^|^| echo 1') do (
     if %%a neq 1 (
         call :VALIDATE_CURL_INSTALLATION "%%a" && set "SDK_CURL=%%a"
     ) else (
-        if exist "%SDK_LOCATION%\curl.exe" call :VALIDATE_CURL_INSTALLATION "%SDK_LOCATION%\curl.exe" && set "SDK_CURL=%SDK_LOCATION%\curl.exe"
+        if exist "!SDK_LOCATION!\curl.exe" call :VALIDATE_CURL_INSTALLATION "!SDK_LOCATION!\curl.exe" && set "SDK_CURL=!SDK_LOCATION!\curl.exe"
     )
 )
-
 if not defined SDK_CURL call :IMPORT_CURL || exit /b 1
 
 set "SDK_CORE=%SDK_LOCATION%\SDK.bat"
 
-if not exist "%SDK_CORE%" (
-    call "%SDK_CURL%" -L#sko "%SDK_CORE%" "https://raw.githubusercontent.com/agamsol/SDK/latest/SDK.bat"
-)
+if not exist "!SDK_CORE!" call "!SDK_CURL!" -L#sko "!SDK_CORE!" "https://raw.githubusercontent.com/agamsol/SDK/latest/SDK.bat"
 exit /b 0
 :: </IMPORT SDK>
 
 :: <IMPORT CURL>
 :IMPORT_CURL
-for /f "delims=" %%a in ('if defined ProgramFiles^(x86^) ^(echo 64^) else ^(echo 86^)') do (
-    for /f "delims=" %%b in ("https://github.com/agamsol/SDK/raw/latest/curl/x%%a/curl.exe") do (
-        set "SDK_CURL=%SDK_LOCATION%\curl.exe"
-        >nul chcp 437
-        >nul 2>&1 powershell /? && (
-            >nul 2>&1 powershell $progressPreference = 'silentlyContinue'; Invoke-WebRequest -Uri "'%%~b'" -OutFile "'!SDK_CURL!'"
-            >nul chcp 65001
-            call :VALIDATE_CURL_INSTALLATION "!SDK_CURL!" && exit /b 0
-        )
+for /f "delims=" %%a in ("https://github.com/agamsol/SDK/raw/latest/curl/x!SYSTEM_BITS!/curl.exe") do (
+    set "SDK_CURL=!SDK_LOCATION!\curl.exe"
+    >nul chcp 437
+    >nul 2>&1 powershell /? && (
+        >nul 2>&1 powershell $progressPreference = 'silentlyContinue'; Invoke-WebRequest -Uri "'%%~a'" -OutFile "'!SDK_CURL!'"
         >nul chcp 65001
-        >nul bitsadmin /transfer someDownload /download /priority high "%%~b" "!SDK_CURL!"
         call :VALIDATE_CURL_INSTALLATION "!SDK_CURL!" && exit /b 0
-	    >nul certutil -urlcache -split -f "%%~b" "!SDK_CURL!"
-	    call :VALIDATE_CURL_INSTALLATION "!SDK_CURL!" && exit /b 0
     )
+    >nul chcp 65001
+    >nul bitsadmin /transfer someDownload /download /priority high "%%~a" "!SDK_CURL!"
+    call :VALIDATE_CURL_INSTALLATION "!SDK_CURL!" && exit /b 0
+    >nul certutil -urlcache -split -f "%%~a" "!SDK_CURL!"
+    call :VALIDATE_CURL_INSTALLATION "!SDK_CURL!" && exit /b 0
 )
 exit /b 1
 
