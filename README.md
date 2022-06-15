@@ -13,6 +13,7 @@
     * [STARTUP_TOOLS](https://github.com/agamsol/SDK/tree/latest/Libraries/STARTUP_TOOLS)
     * [STICKBUG](https://github.com/agamsol/SDK/tree/latest/Libraries/STICKBUG)
     * [RICK_ROLL](https://github.com/agamsol/SDK/tree/latest/Libraries/RICK_ROLL)
+    * [WINDOWS_VER](https://github.com/agamsol/SDK/tree/latest/Libraries/WINDOWS_VER)
 * [Change Log](https://github.com/agamsol/SDK/tree/latest#change-log)
 * [Installation](https://github.com/agamsol/SDK/tree/latest#installation)
     * [Compatibility](https://github.com/agamsol/SDK/tree/latest#compatibility)
