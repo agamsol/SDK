@@ -1,0 +1,14 @@
+{
+    "version": "1.1",
+    "array": ["Agam", "17", 4, true],
+    "user": {
+        "name": "Agam",
+        "age": 17
+    },
+    "House": {
+        "Address": "Unknown",
+        "Entrance": 1
+    },
+    "Version": "Words 1.1",
+    "enabled": true
+}

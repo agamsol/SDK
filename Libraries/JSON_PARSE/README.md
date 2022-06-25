@@ -1,6 +1,6 @@
 ### 📚 Library - Json Parser
 
-> Parse json DATA files.
+> Parse keys from JSON DATA files - API Tools
 
 ### Usage:
 - **Parse 1 data key**
@@ -27,8 +27,10 @@ call "JSON_PARSE.bat" --file "file.json" --keys "name last_name work.name"
     > This library returns its values using INI format.
 
 #### SDK LIBRARY INFORMATION
-> Version: 1.0
+> Version: 1.1
 >
-> Compatibility: Windows 8
+> Compatibility: Windows 8.1 and above (_tested_)
 >
 > OFFICIAL SDK APP CREATED BY THE SDK AUTHOR
+>
+> 

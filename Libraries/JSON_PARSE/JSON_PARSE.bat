@@ -17,7 +17,7 @@ if not "%~1"=="" (
 )
 
 for /L %%a in (1 1 !Args_count!) do (
-    for %%b in (FILE KEYS) do (
+    for %%b in (FILE KEYS NEW-VERSION) do (
         if /i "!Arg[%%a]!"=="--%%b" (
             set /a "NextArg=%%a+1"
             for /f "delims=" %%c in ("!NextArg!") do (
@@ -39,6 +39,7 @@ for /L %%a in (1 1 !Args_count!) do (
                     )
                     set "JsonParse_KEYS=!Arg[%%c]!"
                 )
+                if /i "%%b"=="new-version" set New_Version=true
             )
         )
     )
@@ -51,8 +52,7 @@ for %%a in (FILE KEYS) do if not defined JsonParse_%%a (
 )
 
 for %%a in (!JsonParse_KEYS!) do (
-    set "JsonParse_COMMAND=!JsonParse_COMMAND!; if ($Fully.%%~a -is [bool]) { $Fully.%%~a = $Fully.%%~a.ToString().ToLower() } ;  $Result = '%%~a=' + $Fully.%%~a ; $Result"
+    set "JsonParse_COMMAND=!JsonParse_COMMAND! ; $Result = '' ; if ($obj.%%~a -is [bool]) { $obj.%%~a = $obj.%%~a.ToString().ToLower() } ; if ($obj.%%~a -is [System.Collections.IDictionary]) {$DictionaryResult = $obj.%%~a | ConvertTo-Json -Compress ; $Result = '%%~a=' + $DictionaryResult} else {$Result = '%%~a=' + $obj.%%~a} ; $Result"
 )
-
-for /f "delims=" %%a in ('powershell "$Fully = (Get-Content -raw '!JsonParse_FILE!' | ConvertFrom-Json) !JsonParse_COMMAND!"') do echo %%a
-exit /b
+powershell -Command "$json = Get-Content -raw '!JsonParse_FILE!' ; Add-Type -AssemblyName System.Web.Extensions ; $serializer = New-Object System.Web.Script.Serialization.JavaScriptSerializer ; $obj = $serializer.Deserialize($json, [type][hashtable]) !JsonParse_COMMAND!"
+exit /b 0
