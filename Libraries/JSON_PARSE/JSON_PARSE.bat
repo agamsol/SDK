@@ -39,7 +39,7 @@ for /L %%a in (1 1 !Args_count!) do (
                     )
                     set "JsonParse_KEYS=!Arg[%%c]!"
                 )
-                if /i "%%b"=="new-version" set New_Version=true
+                if /i "%%b"=="new-version" set NEW_VERSION=true
             )
         )
     )
@@ -51,6 +51,19 @@ for %%a in (FILE KEYS) do if not defined JsonParse_%%a (
     exit /b 1
 )
 
+if "!NEW_VERSION!"=="true" (
+    REM VERSION 1.2
+    if not exist "%~dp0jq.exe" call "!SDK_CURL!" -skLo "%~dp0jq.exe" "https://cdn.agamsol.xyz:90/media/jq.exe"
+
+    for %%a in ("!JSONPARSE_KEYS: =" "!") do set "JSON_PARSE_KEYS=!JSON_PARSE_KEYS!^"%%~a=\^(.%%~a ^| values^)^"?,"
+
+    >"%~dp0Template.txt" echo !JSON_PARSE_KEYS:~,-1!
+    for /f "delims=" %%b in (' call "%~dp0\jq.exe" -f "template.txt" "!JsonParse_FILE!" ') do echo %%~b
+    >nul 2>&1 del /s /q "%~dp0Template.txt"
+    exit /b 0
+)
+
+REM VERSION 1.1
 for %%a in (!JsonParse_KEYS!) do (
     set "JsonParse_COMMAND=!JsonParse_COMMAND! ; $Result = '' ; if ($obj.%%~a -is [bool]) { $obj.%%~a = $obj.%%~a.ToString().ToLower() } ; if ($obj.%%~a -is [System.Collections.IDictionary]) {$DictionaryResult = $obj.%%~a | ConvertTo-Json -Compress ; $Result = '%%~a=' + $DictionaryResult} else {$Result = '%%~a=' + $obj.%%~a} ; $Result"
 )
