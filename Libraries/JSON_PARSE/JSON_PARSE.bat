@@ -17,7 +17,7 @@ if not "%~1"=="" (
 )
 
 for /L %%a in (1 1 !Args_count!) do (
-    for %%b in (FILE KEYS NEW-VERSION) do (
+    for %%b in (FILE KEYS NEW-VERSION TRIGGER-ANYWAYS) do (
         if /i "!Arg[%%a]!"=="--%%b" (
             set /a "NextArg=%%a+1"
             for /f "delims=" %%c in ("!NextArg!") do (
@@ -39,6 +39,7 @@ for /L %%a in (1 1 !Args_count!) do (
                     )
                     set "JsonParse_KEYS=!Arg[%%c]!"
                 )
+                if /i "%%b"=="trigger-anyways" set "trigger=false"
                 if /i "%%b"=="new-version" set NEW_VERSION=true
             )
         )
@@ -52,10 +53,12 @@ for %%a in (FILE KEYS) do if not defined JsonParse_%%a (
 )
 
 if "!NEW_VERSION!"=="true" (
-    REM VERSION 1.2
+    REM VERSION 1.3
     if not exist "%~dp0jq.exe" call "!SDK_CURL!" -skLo "%~dp0jq.exe" "https://cdn.agamsol.xyz:90/media/jq.exe"
 
-    for %%a in ("!JSONPARSE_KEYS: =" "!") do set "JSON_PARSE_KEYS=!JSON_PARSE_KEYS!^"%%~a=\^(.%%~a ^| values^)^"?,"
+    if "!trigger!"=="false" (
+        for %%a in ("!JSONPARSE_KEYS: =" "!") do set "JSON_PARSE_KEYS=!JSON_PARSE_KEYS!^"%%~a=\^(.%%~a^)^"?,"
+    ) else for %%a in ("!JSONPARSE_KEYS: =" "!") do set "JSON_PARSE_KEYS=!JSON_PARSE_KEYS!^"%%~a=\^(.%%~a ^| values^)^"?,"
 
     >"%~dp0Template.txt" echo !JSON_PARSE_KEYS:~,-1!
     for /f "delims=" %%b in (' call "%~dp0\jq.exe" -f "template.txt" "!JsonParse_FILE!" ') do echo %%~b

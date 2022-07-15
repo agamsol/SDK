@@ -2,7 +2,7 @@
 
 > Parse keys from JSON DATA files - API Tools
 
-> As for version 1.2 - [JQ](https://stedolan.github.io/jq/) is integrated into version 1.2
+> As for version 1.2 - [JQ](https://stedolan.github.io/jq/) is integrated into version 1.3
 >
 > **to use it you'd need to use the `--new-version` parameter.**
 
@@ -39,10 +39,10 @@ call "JSON_PARSE.bat" --file "file.json" --keys "name last_name work.name" [--ne
     > This library returns its values using INI format.
 
 #### SDK LIBRARY INFORMATION
-> Version: 1.2
+> Version: 1.3
 >
 > Compatibility: Windows 8.1 and above (_tested_)
 >
 > OFFICIAL SDK APP CREATED BY THE SDK AUTHOR WITH THE HELP OF [JQ](https://stedolan.github.io/jq/)
 >
-> NEW IN 1.2: Using JQ
+> **WHATS NEW :new: 1.3:** Added `--trigger-anyways` parameter - this will allow you to output keys as `null` if they are not defined - unless used - nothing will print.
