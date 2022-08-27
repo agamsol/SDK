@@ -223,7 +223,7 @@ for %%a in (!SERVER_LIBRARIES!) do (
                 >nul 2>&1 rmdir /s /q "Libraries\%%a"
                 call :Install-Library "%%a"
             )
-            REM echo SDK[%%a]=!SDK_INSTALL_LOCATION!\Libraries\%%a\!SERVER_LIBRARY[%%a]_MAIN_SCRIPT!
+            echo SDK[%%a]=!SDK_INSTALL_LOCATION!\Libraries\%%a\!SERVER_LIBRARY[%%a]_MAIN_SCRIPT!
         )
     )
 )
@@ -249,7 +249,6 @@ exit /b 0
 :: <INSTALL_LIBRARY>
 :Install-Library [LIBRARY_NAME]
     <nul call "!SDK_CURL!" --create-dirs -#Lkso "Libraries\%~1\!SERVER_LIBRARY[%~1]_MAIN_SCRIPT!" "!REPO_BASE_URL!!REPO_USER!/raw/!CHECK_FOR_UPDATES!/Libraries/%~1/!SERVER_LIBRARY[%~1]_MAIN_SCRIPT!"
-    echo call "!SDK_CURL!" --create-dirs -#Lkso "Libraries\%~1\!SERVER_LIBRARY[%~1]_MAIN_SCRIPT!" "!REPO_BASE_URL!!REPO_USER!/raw/!CHECK_FOR_UPDATES!/Libraries/%~1/!SERVER_LIBRARY[%~1]_MAIN_SCRIPT!"
     >"Libraries\%~1\META.ini" (
         echo [%~1]
         echo VERSION=!SERVER_LIBRARY[%~1]_VERSION!
