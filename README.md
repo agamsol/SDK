@@ -1,30 +1,30 @@
-## 📚 Batch Software Development Kit - 1.0.0.1
+## 📚 Batch Software Development Kit - 1.0.0.2
 > A script to sync all libraries that your scripts use often, preventing code duplications and syncing all libraries with variables that bring windows 7 compatible with most libraries and the SDK itself
 
 ## Table of contents
-* [How does this work?](https://github.com/agamsol/SDK/tree/latest#how-does-this-work)
-* [Libraries](https://github.com/agamsol/SDK/tree/latest#libraries)
-    * [JSON_PARSE](https://github.com/agamsol/SDK/tree/latest/Libraries/JSON_PARSE)
-    * [RENTRY](https://github.com/agamsol/SDK/tree/latest/Libraries/RENTRY)
-    * [DISCORD_WEBHOOK_CHECKER](https://github.com/agamsol/SDK/tree/latest/Libraries/DISCORD_WEBHOOK_CHECKER)
-    * [HEXADECIMAL](https://github.com/agamsol/SDK/tree/latest/Libraries/HEXADECIMAL)
-    * [NETWORK](https://github.com/agamsol/SDK/tree/latest/Libraries/GET_NETWORK)
-    * [CHANGE_CASE](https://github.com/agamsol/SDK/tree/latest/Libraries/CHANGE_CASE)
-    * [STARTUP_TOOLS](https://github.com/agamsol/SDK/tree/latest/Libraries/STARTUP_TOOLS)
-    * [STICKBUG](https://github.com/agamsol/SDK/tree/latest/Libraries/STICKBUG)
-    * [RICK_ROLL](https://github.com/agamsol/SDK/tree/latest/Libraries/RICK_ROLL)
-    * [WINDOWS_VER](https://github.com/agamsol/SDK/tree/latest/Libraries/WINDOWS_VER)
-* [Change Log](https://github.com/agamsol/SDK/tree/latest#change-log)
-* [Installation](https://github.com/agamsol/SDK/tree/latest#installation)
-    * [Compatibility](https://github.com/agamsol/SDK/tree/latest#compatibility)
-    * [Installing the SDK](https://github.com/agamsol/SDK/tree/latest#installing-the-sdk)
-        * [STEP 1](https://github.com/agamsol/SDK/tree/latest#step-1)
-        * [STEP 2](https://github.com/agamsol/SDK/tree/latest#step-2)
-        * [STEP 3](https://github.com/agamsol/SDK/tree/latest#step-3)
-    * [Installing Specific libraries](https://github.com/agamsol/SDK/tree/latest#installing-specific-libraries)
-* [Using a library](https://github.com/agamsol/SDK/tree/latest#using-a-library)
-* [Support 💁‍♂️](https://github.com/agamsol/SDK/tree/latest#support-%EF%B8%8F)
-* [Buy me a coffee ☕](https://github.com/agamsol/SDK/tree/latest#buy-me-a-coffee-)
+* [How does this work?](https://github.com/agamsol/SDK/tree/1.0.0.2#how-does-this-work)
+* [Libraries](https://github.com/agamsol/SDK/tree/1.0.0.2#libraries)
+    * [JSON_PARSE](https://github.com/agamsol/SDK/tree/1.0.0.2/Libraries/JSON_PARSE)
+    * [RENTRY](https://github.com/agamsol/SDK/tree/1.0.0.2/Libraries/RENTRY)
+    * [DISCORD_WEBHOOK_CHECKER](https://github.com/agamsol/SDK/tree/1.0.0.2/Libraries/DISCORD_WEBHOOK_CHECKER)
+    * [HEXADECIMAL](https://github.com/agamsol/SDK/tree/1.0.0.2/Libraries/HEXADECIMAL)
+    * [NETWORK](https://github.com/agamsol/SDK/tree/1.0.0.2/Libraries/NETWORK)
+    * [CHANGE_CASE](https://github.com/agamsol/SDK/tree/1.0.0.2/Libraries/CHANGE_CASE)
+    * [STARTUP_TOOLS](https://github.com/agamsol/SDK/tree/1.0.0.2/Libraries/STARTUP_TOOLS)
+    * [STICKBUG](https://github.com/agamsol/SDK/tree/1.0.0.2/Libraries/STICKBUG)
+    * [RICK_ROLL](https://github.com/agamsol/SDK/tree/1.0.0.2/Libraries/RICK_ROLL)
+    * [WINVER](https://github.com/agamsol/SDK/tree/1.0.0.2/Libraries/WINVER)
+* [Change Log](https://github.com/agamsol/SDK/tree/1.0.0.2#change-log)
+* [Installation](https://github.com/agamsol/SDK/tree/1.0.0.2#installation)
+    * [Compatibility](https://github.com/agamsol/SDK/tree/1.0.0.2#compatibility)
+    * [Installing the SDK](https://github.com/agamsol/SDK/tree/1.0.0.2#installing-the-sdk)
+        * [STEP 1](https://github.com/agamsol/SDK/tree/1.0.0.2#step-1)
+        * [STEP 2](https://github.com/agamsol/SDK/tree/1.0.0.2#step-2)
+        * [STEP 3](https://github.com/agamsol/SDK/tree/1.0.0.2#step-3)
+    * [Installing Specific libraries](https://github.com/agamsol/SDK/tree/1.0.0.2#installing-specific-libraries)
+* [Using a library](https://github.com/agamsol/SDK/tree/1.0.0.2#using-a-library)
+* [Support 💁‍♂️](https://github.com/agamsol/SDK/tree/1.0.0.2#support-%EF%B8%8F)
+* [Buy me a coffee ☕](https://github.com/agamsol/SDK/tree/1.0.0.2#buy-me-a-coffee-)
 
 ## How does this work
 > SDK script which is being called at the start of your batch file is responsible for keeping the SDK and all other libraries up-to-date and returns all paths as INI format so that you can set and use them in your own script.
@@ -33,9 +33,18 @@
 > Each library is responsible for doing a specific task related to a different topic (Eg. Checking wether a discord webhook URL works or not)
 
 ## Change Log
-- Fixed a problem while using `--install-location`
+- Majorly improved waiting times for SDK to load.
 
-    If this parameter is defined and there is update available the SDK will try to pushed to the same file 2 times.
+    This feature includes the following subroutines:
+    - Install-Library (Allows to install the library by its name)
+    - Load-ConfigInformation (Parses information through INI formatted-files)
+- Fixed names of libraries that were incorrect in the documentation
+
+- NOTE: The following libraries has been renamed:
+    - `GET_NETWORK` is now known as `NETWORK`
+    - `WINDOWS_VER` is now known as `WINVER`
+
+- When the script imports the SDK statistics of fixes and updates will show up.
 
 ## Installation
 > A part of the SDK installation script is responsible for installing [CURL](https://curl.se/) this dependecy allows to download files on older versions of windows, the other parts are responsible to validate the file installed works and starting the SDK installation

@@ -1,15 +1,16 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set SDK_VERSION=1.0.0.1
+set SDK_VERSION=1.0.0.2
 set "SDK_CONFIG=config.ini"
-set "DEFAULT_INSTALL_LOCATION=%~f0"
+set "DEFAULT_INSTALL_LOCATION=%~dp0"
 
 :: <REPO SETTINGS>
 set "REPO_BASE_URL=https://github.com/"
 set "REPO_USER=agamsol/SDK"
-set "REPO_BRANCH=1.0.0.1"
+set "REPO_BRANCH=1.0.0.2"
 set "REPO_FULL=!REPO_BASE_URL!!REPO_USER!/raw/!REPO_BRANCH!"
+set "CHECK_FOR_UPDATES=latest"
 :: <REPO SETTINGS>
 
 :: <LOAD ARGS>
@@ -18,7 +19,7 @@ set "ALL_ARGS=%*"
 if not "%~1"=="" (
     set /a Args_count+=1
     set "Arg[!Args_count!]=%~1"
-    SHIFT
+    SHIFT /1
     GOTO :LOAD_ARGS
 )
 
@@ -103,13 +104,13 @@ if not exist "!SDK_CONFIG!" (
 )
 
 if "!ARG_REQUIRE_CONFIG!"=="true" (
-    if exist "!SDK_CONFIG!" call :LOAD_CONFIG "!SDK_CONFIG!" *
+    if exist "!SDK_CONFIG!" call :Load-ConfigInformation "!SDK_CONFIG!" "" "" --NotALibrary
     !AFTER_CONFIG_LOAD!
 )
 
 if "!CONFIG_UPDATE!"=="true" call :CREATE_CONFIG
 
-call :LOAD_CONFIG "!SDK_CONFIG!" *
+call :Load-ConfigInformation "!SDK_CONFIG!" "" "" --NotALibrary
 
 if "!PRINT_VARIABLES!"=="true" (
     if defined SDK_CUSTOM_ENVIRONMENT_VARIABLES (
@@ -121,7 +122,7 @@ if "!PRINT_VARIABLES!"=="true" (
 if not exist "Libraries" md "Libraries"
 
 :: <UPDATE ENVIRONMENT VARIABLES>
-if exist "Libraries\env.ini" call :LOAD_CONFIG "Libraries\env.ini" *
+if exist "Libraries\env.ini" call :Load-ConfigInformation "Libraries\env.ini" "" "" --NotALibrary
 
 if not "!SDK_CORE!"=="!DEFAULT_INSTALL_LOCATION!" (
     set "SDK_CORE=!DEFAULT_INSTALL_LOCATION!"
@@ -145,12 +146,12 @@ if "!EXIT!"=="true" exit /b
      >nul 2>&1 del /s /q "Libraries\Libraries.ini"
      set "CHECKED_AT=!DATE!"
      call :CREATE_CONFIG
-     for /f "delims=" %%a in ('call "!SDK_CURL!" -sLk "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK-Version.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
+     for /f "delims=" %%a in ('call "!SDK_CURL!" -sLk "!REPO_BASE_URL!!REPO_USER!/raw/!CHECK_FOR_UPDATES!/SDK-Version.ini"') do <nul set /p=%%a | findstr /rc:"^[\[#].*">nul || set SERVER_%%a
      if defined SERVER_SDK_VERSION (
          if not "!SDK_VERSION!"=="!SERVER_SDK_VERSION!" (
          if exist "SDK-[NEW].bat" del "SDK-[NEW].bat"
 
-         "!SDK_CURL!" -fLs#ko "SDK-[NEW].bat" "!REPO_BASE_URL!!REPO_USER!/raw/latest/SDK.bat"
+         "!SDK_CURL!" -fLs#ko "SDK-[NEW].bat" "!REPO_BASE_URL!!REPO_USER!/raw/!CHECK_FOR_UPDATES!/SDK.bat"
 
          if not exist "SDK-[NEW].bat" (
              echo:
@@ -178,75 +179,112 @@ if "!EXIT!"=="true" exit /b
 :: </CHECK FOR SDK UPDATES>
 
 :: <UPDATE ALL LIBRARIES>
+set LIBRARIES_FIXED=0
+set LIB_UPDATED=0
 if not exist "Libraries\Libraries.ini" (
-    call "!SDK_CURL!" -L#sko "Libraries\Libraries.ini" "!REPO_BASE_URL!!REPO_USER!/raw/latest/Libraries/Libraries.ini"
+    call "!SDK_CURL!" -L#sko "Libraries\Libraries.ini" "!REPO_BASE_URL!!REPO_USER!/raw/!CHECK_FOR_UPDATES!/Libraries/Libraries.ini"
 )
 
-call :LOAD_CONFIG "Libraries\Libraries.ini" Libraries
+call :Load-ConfigInformation "Libraries\Libraries.ini" --DontMergeAll "SERVER_"
+set SERVER_LIBRARIES=!LIBRARIES!
 
-for %%a in (!LIBRARIES!) do if not "!SDK_SPECIFIC_LIBRARIES!"=="!SDK_SPECIFIC_LIBRARIES:%%a=!" (
+call :Load-ConfigInformation "Libraries\META.ini" --MergeAll "LOCAL_"
 
-        REM echo Fetching information: %%a
+for %%a in (!SERVER_LIBRARIES!) do (
 
-    for %%a in (ENABLED VERSION LIBRARY_NAME MAIN_SCRIPT) do (
-        set LOCAL_%%a=
-        set SERVER_%%a=
-    )
-    REM CHECK IF THE LIBRARY IS ENABLED
-    call :LOAD_CONFIG "Libraries\Libraries.ini" %%a "SERVER_"
+    if not "!SDK_SPECIFIC_LIBRARIES!"=="!SDK_SPECIFIC_LIBRARIES:%%a=!" (
 
-    if /i not "!SERVER_ENABLED!"=="false" (
+        if /i "!SERVER_LIBRARY[%%a]_ENABLED!"=="true" (
 
-        REM IF THE LIBRARY EXISTS:
-        if exist "Libraries\%%a\META.ini" (
+            REM LOOP PER LIBRARY NAME - IF ENABLED
+            REM echo Fetching information: %%a
 
-            call :LOAD_CONFIG "Libraries\%%a\META.ini" %%a "LOCAL_"
+            if exist "Libraries\%%a\META.ini" (
 
-            if not "!LOCAL_VERSION!"=="!SERVER_VERSION!" (
-                REM UPDATE LIBRARY
-                >nul del /s /q "Libraries\!SERVER_LIBRARY_NAME!\*"
-                call <nul "!SDK_CURL!" --create-dirs -#Lkso "Libraries\!SERVER_LIBRARY_NAME!\!SERVER_MAIN_SCRIPT!" "!REPO_BASE_URL!!REPO_USER!/raw/latest/Libraries/!SERVER_LIBRARY_NAME!/!SERVER_MAIN_SCRIPT!"
-                >"Libraries\!SERVER_LIBRARY_NAME!\META.ini" (
-                    echo [!SERVER_LIBRARY_NAME!]
-                    echo VERSION=!SERVER_VERSION!
-                    echo LIBRARY_NAME=!SERVER_LIBRARY_NAME!
-                    echo MAIN_SCRIPT=!SERVER_MAIN_SCRIPT!
+                if not exist "Libraries\%%a\!LOCAL_LIBRARY[%%a]_MAIN_SCRIPT!" (
+                    REM LIBRARY SCRIPT IS MISSING - REINSTALL LIBRARY [%%a]
+                    set LOCAL_LIBRARY[%%a]_REINSTALLED_NOW=true
+                    >nul del /s /q "Libraries\%%a\*"
+                    call :Install-Library "%%a"
+                    set /a LIBRARIES_FIXED+=1
                 )
-                set /a LIB_UPDATED+=1
-            )
-        ) else if exist "Libraries\%%a" >nul rmdir /s /q "Libraries\%%a"
 
-        for %%b in (META.ini "!SERVER_MAIN_SCRIPT!") do (
-            if not exist "Libraries\!SERVER_LIBRARY_NAME!\%%~b" (
-                REM INSTALL LIBRARY
-                call <nul "!SDK_CURL!" --create-dirs -#Lkso "Libraries\!SERVER_LIBRARY_NAME!\!SERVER_MAIN_SCRIPT!" "!REPO_BASE_URL!!REPO_USER!/raw/latest/Libraries/!SERVER_LIBRARY_NAME!/!SERVER_MAIN_SCRIPT!"
-                >"Libraries\!SERVER_LIBRARY_NAME!\META.ini" (
-                    echo [!SERVER_LIBRARY_NAME!]
-                    echo VERSION=!SERVER_VERSION!
-                    echo LIBRARY_NAME=!SERVER_LIBRARY_NAME!
-                    echo MAIN_SCRIPT=!SERVER_MAIN_SCRIPT!
+                if not "!LOCAL_LIBRARY[%%a]_REINSTALLED_NOW!"=="true" (
+                    if not "!SERVER_LIBRARY[%%a]_VERSION!"=="!LOCAL_LIBRARY[%%a]_VERSION!" (
+                        REM UPDATE LIBRARY
+                        >nul del /s /q "Libraries\%%a\*"
+                        call :Install-Library "%%a"
+                        set /a LIB_UPDATED+=1
+                    )
+                )
+
+            ) else (
+                REM LIBRARY DOES NOT EXIST - INSTALL LIBRARY FOR THE FIRST TIME
+                >nul 2>&1 rmdir /s /q "Libraries\%%a"
+                call :Install-Library "%%a"
+            )
+            REM echo SDK[%%a]=!SDK_INSTALL_LOCATION!\Libraries\%%a\!SERVER_LIBRARY[%%a]_MAIN_SCRIPT!
+        )
+    )
+)
+
+if !LIBRARIES_FIXED! equ 1 (
+    set LIBRARIES_FIXED_UNIT=Fixed !LIBRARIES_FIXED! Library
+) else (
+    set LIBRARIES_FIXED_UNIT=Fixed !LIBRARIES_FIXED! Libraries
+)
+
+if !LIB_UPDATED! equ 1 (
+    set LIB_UPDATED_UNIT=Updated !LIB_UPDATED! Library
+) else (
+    set LIB_UPDATED_UNIT=Updated !LIB_UPDATED! Libraries
+)
+echo SDK_INFORMATION_CHANGES_LOG=!LIBRARIES_FIXED_UNIT! and !LIB_UPDATED_UNIT!.
+
+for %%a in (LIBRARIES_FIXED LIB_UPDATED) do (
+    if !%%a! gtr 0 >nul 2>&1 del /s /q "Libraries\Libraries.ini"
+)
+exit /b 0
+
+:: <INSTALL_LIBRARY>
+:Install-Library [LIBRARY_NAME]
+    <nul call "!SDK_CURL!" --create-dirs -#Lkso "Libraries\%~1\!SERVER_LIBRARY[%~1]_MAIN_SCRIPT!" "!REPO_BASE_URL!!REPO_USER!/raw/!CHECK_FOR_UPDATES!/Libraries/%~1/!SERVER_LIBRARY[%~1]_MAIN_SCRIPT!"
+    echo call "!SDK_CURL!" --create-dirs -#Lkso "Libraries\%~1\!SERVER_LIBRARY[%~1]_MAIN_SCRIPT!" "!REPO_BASE_URL!!REPO_USER!/raw/!CHECK_FOR_UPDATES!/Libraries/%~1/!SERVER_LIBRARY[%~1]_MAIN_SCRIPT!"
+    >"Libraries\%~1\META.ini" (
+        echo [%~1]
+        echo VERSION=!SERVER_LIBRARY[%~1]_VERSION!
+        echo MAIN_SCRIPT=!SERVER_LIBRARY[%~1]_MAIN_SCRIPT!
+    )
+exit /b
+
+:: <LOAD_CONFIGURATION_FILES>
+:Load-ConfigInformation [FILE] [--MergeAll] [VAR_PREFIX] [--NotALibrary]
+    set CURRENT_LIBRARY=Undefined
+    set LIBRARIES=
+    if /i "%~2"=="--MergeAll" (
+        set "isMergeFiles=2>nul dir /b /s "%~1""
+    ) else (
+        set isMergeFiles=echo "%~1"
+    )
+    for /f "delims=" %%a in ('!isMergeFiles!') do (
+        for /f "delims=" %%b in ('type "%%~a"') do (
+            REM CHECK IF CATE - IF CATE GET CATE NAME WITHOUT SQUARED QUOTES AND NAME VARS WITH PREFIX
+            <nul set /p=%%b | >nul findstr /ric:"\[*\]" && (
+                for /f "tokens=1 delims=[]" %%c in ("%%b") do (
+                    set CURRENT_LIBRARY=%%c
+                    set LIBRARIES=!LIBRARIES! %%c
+                )
+            ) || (
+                if "%~4"=="--NotALibrary" (
+                    set %%b
+                ) else (
+                    set "%~3LIBRARY[!CURRENT_LIBRARY!]_%%b"
                 )
             )
         )
-        echo SDK[!SERVER_LIBRARY_NAME!]=!SDK_INSTALL_LOCATION!\Libraries\!SERVER_LIBRARY_NAME!\!SERVER_MAIN_SCRIPT!
     )
-)
-if !LIB_UPDATED! gtr 0 >nul 2>&1 del /s /q "Libraries\Libraries.ini"
-exit /b 0
-:: </UPDATE ALL LIBRARIES>
-
-:: <LOAD CONFIG>
-:LOAD_CONFIG [FILE] [CATEGORY] [VAR_PREFIX]
-for /f "delims= usebackq" %%a in ("%~1") do (
-    if !ParseCategory! equ 1 (
-        <nul set /p=%%a | findstr /ric:"\[*\]">nul && (
-            set ParseCategory=0
-        ) || <nul set /p=%%a | findstr /brc:"[#]">nul || set "%~3%%a"
-    )
-    echo %%a | findstr /ric:"\[%~2\]">nul && set ParseCategory=1
-)
-exit /b
-:: </LOAD CONFIG>
+    exit /b
+:: </LOAD_CONFIGURATION_FILES>
 
 :: <CREATE_ENVIRONMENT>
 :CREATE_ENVIRONMENT
