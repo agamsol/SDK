@@ -1,14 +1,14 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set SDK_VERSION=1.0.0.2
+set SDK_VERSION=1.0.0.3
 set "SDK_CONFIG=config.ini"
 set "DEFAULT_INSTALL_LOCATION=%~dp0"
 
 :: <REPO SETTINGS>
 set "REPO_BASE_URL=https://github.com/"
 set "REPO_USER=agamsol/SDK"
-set "REPO_BRANCH=1.0.0.2"
+set "REPO_BRANCH=1.0.0.3"
 set "REPO_FULL=!REPO_BASE_URL!!REPO_USER!/raw/!REPO_BRANCH!"
 set "CHECK_FOR_UPDATES=latest"
 :: <REPO SETTINGS>
@@ -91,13 +91,6 @@ if not defined SDK_INSTALL_LOCATION (
     pushd "%~dp0"
 )
 
-:: <INTERNET CONNECTION CHECK>
- ping -n 1 github.com | findstr /c:"TTL">nul || (
-     echo ERROR=NO CONNECTION
-     exit /b 1
- )
-:: </INTERNET CONNECTION CHECK>
-
 if not exist "!SDK_CONFIG!" (
     set CHECKED_AT=!DATE!
     set CONFIG_UPDATE=true
@@ -134,6 +127,13 @@ if not defined SDK_CURL (
     if not defined SDK_CURL set "SDK_CURL=curl.exe"
     set ENV_UPDATE=true
 )
+
+:: <INTERNET CONNECTION CHECK>
+ >nul "!SDK_CURL!" -Lsk github.com || (
+     echo ERROR=NO CONNECTION
+     exit /b 1
+ )
+:: </INTERNET CONNECTION CHECK>
 
 if "!ENV_UPDATE!"=="true" call :CREATE_ENVIRONMENT
 
