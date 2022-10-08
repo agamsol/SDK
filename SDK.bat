@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 set SDK_VERSION=1.0.0.3
 set "SDK_CONFIG=config.ini"
-set "DEFAULT_INSTALL_LOCATION=%~dp0"
+set "DEFAULT_INSTALL_LOCATION=%~f0"
 
 :: <REPO SETTINGS>
 set "REPO_BASE_URL=https://github.com/"
