@@ -34,6 +34,7 @@
 
 ## Change Log
 > 1.0.0.3
+- [Replace SDK Installer command] Fixed a major bug with updater in version 1.0.0.2
 - Fixed a bug with internet connection checker.
 
 > 1.0.0.2
@@ -135,10 +136,17 @@ exit /b 0
 > This part will make sure that your SDK is executed when your main script starts, you'd need to choose where to place it, before making your decision, I'd recommend you to import it at the very start of your script to also collect variables like `!SDK_CURL!`, this will allow your script to use CURL in lower systems than windows 10, as mentioned in the [Compatibility](https://github.com/agamsol/SDK/tree/latest#compatibility) part.
 
 ```bat
+:TRY_IMPORT_SDK
 call :IMPORT_SDK && (
-    REM INFO: Installed SDK.
-    REM INFO: Starting SDK.
-    for /f "delims=" %%a in ('call "!SDK_CORE!" --curl "!SDK_CURL!" --install-location "!SDK_LOCATION!"') do set %%a
+    echo INFO: Installed SDK.
+    REM UPDATER FIX FOR 1.0.0.2
+    for /f "delims=" %%a in ('type "!SDK_CORE!" ^| findstr /c:"set SDK_VERSION="') do %%a
+    if "!SDK_VERSION!"=="1.0.0.2" (
+        >nul 2>&1 del /q "!SDK_CORE!"
+        goto :TRY_IMPORT_SDK
+    )
+    echo INFO: Starting SDK.
+    for /f "delims=" %%a in ('call "!SDK_CORE!" --curl "!SDK_CURL!" --install-location "!SDK_LOCATION!" --libraries "!SDK_Libraries!"') do set %%a
 )
 ```
 
